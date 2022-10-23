@@ -8,12 +8,14 @@ import {
   Put,
   Delete,
   HttpStatus,
+  UseGuards,
 } from '@nestjs/common';
 import { TodosService } from './todos.service';
 import { Response } from 'express';
 import { CreateTodoDto } from './dto/create-todo.dto';
 import { Todo } from './schemas/todo.schema';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { AccessTokenGuard } from '../auth/guards/access-token.guard';
 
 @ApiTags('todos')
 @Controller('todos')
@@ -37,6 +39,7 @@ export class TodosController {
     return this.services.getById(id);
   }
 
+  @UseGuards(AccessTokenGuard)
   @ApiOperation({ summary: 'Create a todo' })
   @Post()
   async create(
