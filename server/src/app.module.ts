@@ -5,6 +5,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { TodosModule } from './modules/todos/todos.module';
+import { UsersModule } from './modules/users/users.module';
 
 const envFilePath: string = getEnvPath(`${__dirname}/environments`);
 @Module({
@@ -21,6 +22,7 @@ const envFilePath: string = getEnvPath(`${__dirname}/environments`);
       inject: [ConfigService],
     }),
     TodosModule,
+    UsersModule,
   ],
   controllers: [AppController],
   providers: [AppService],

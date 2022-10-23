@@ -1,4 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import mongoose from 'mongoose';
+import { User } from 'src/modules/users/schemas/user.schema';
 
 export type TodoDocument = Todo & Document;
 
@@ -22,6 +24,12 @@ export class Todo {
   @Prop()
   @Prop({ default: false })
   isDeleted: boolean;
+
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User' })
+  createdBy: User;
+
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User' })
+  updatedBy: User;
 }
 
 const TodoSchema = SchemaFactory.createForClass(Todo);
