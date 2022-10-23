@@ -18,27 +18,12 @@ export class UsersService {
     return this.userModel.find().exec();
   }
 
-  async findById(id: string, withTodos = false): Promise<any> {
-    const query = this.userModel.findById(id);
-
-    if (withTodos) {
-      query.populate({ path: 'todos', select: 'name' });
-    }
-
-    const user = (await query.exec()) as any;
+  async findById(id: string): Promise<any> {
+    const user = await this.userModel.findById(id);
     if (!user) {
       throw new NotFoundException(`User ${id} not found`);
     } else {
-      return Object.assign(
-        {},
-        {
-          _id: user._id,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          email: user.email,
-          todos: user.todos,
-        },
-      );
+      return user;
     }
   }
 
