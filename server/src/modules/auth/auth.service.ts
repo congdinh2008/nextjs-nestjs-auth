@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
@@ -30,6 +34,7 @@ export class AuthService {
     });
 
     const tokens = await this.getTokens(newUser);
+    await this.updateRefreshToken(newUser._id, tokens.refreshToken);
     return tokens;
   }
 
@@ -46,17 +51,55 @@ export class AuthService {
     }
 
     const tokens = await this.getTokens(user);
+    await this.updateRefreshToken(user.id, tokens.refreshToken);
     return tokens;
   }
 
+  async logout(userId: string) {
+    return this.usersService.update(userId, { refreshToken: null });
+  }
+
+  async refreshTokens(userId: string, refreshToken: string) {
+    const user = await this.usersService.findById(userId);
+    console.log(user);
+
+    if (!user || !user.refreshToken)
+      throw new ForbiddenException('Access Denied');
+
+    const refreshTokenMatches = await compare(refreshToken, user.refreshToken);
+
+    if (!refreshTokenMatches) throw new ForbiddenException('Access Denied');
+
+    const tokens = await this.getTokens(user);
+    await this.updateRefreshToken(user.id, tokens.refreshToken);
+
+    return tokens;
+  }
+
+  async updateRefreshToken(userId: string, refreshToken: string) {
+    const hashedRefreshToken = await hash(refreshToken, 10);
+    await this.usersService.update(userId, {
+      refreshToken: hashedRefreshToken,
+    });
+  }
+
   async getTokens(user) {
-    const accessToken = await this.jwtService.signAsync(
-      { sub: user._id, username: user.username },
-      {
-        secret: this.configService.get<string>('JWT_ACCESS_SECRET'),
-        expiresIn: this.configService.get<string>('ACCESS_EXPIRES_IN'),
-      },
-    );
+    const [accessToken, refreshToken] = await Promise.all([
+      this.jwtService.signAsync(
+        { sub: user._id, username: user.username },
+        {
+          secret: this.configService.get<string>('JWT_ACCESS_SECRET'),
+          expiresIn: this.configService.get<string>('ACCESS_EXPIRES_IN'),
+        },
+      ),
+      this.jwtService.signAsync(
+        { sub: user._id, username: user.username },
+        {
+          secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
+          expiresIn: this.configService.get<string>('REFRESH_EXPIRES_IN'),
+        },
+      ),
+    ]);
 
     return {
       user: {
@@ -67,6 +110,7 @@ export class AuthService {
         lastName: user.lastName,
       },
       accessToken,
+      refreshToken,
     };
   }
 }
