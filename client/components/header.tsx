@@ -45,7 +45,7 @@ export default function Header() {
             <ul className="navbar-nav">
               {!isAuthenticated && (
                 <li className="nav-item">
-                  <Link href="/auth/signin">
+                  <Link href="/auth/login">
                     <a className="nav-link">Sign In</a>
                   </Link>
                 </li>
