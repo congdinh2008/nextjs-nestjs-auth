@@ -1,8 +1,9 @@
 import Link from "next/link";
-import styles from "../styles/Home.module.scss";
+import useAuth from "../hooks/useAuth";
+import { signOut } from "next-auth/react";
 
 export default function Header() {
-  const isAuthenticated = false;
+  const isAuthenticated = useAuth(true);
   return (
     <header>
       <nav className="navbar navbar-expand-lg bg-dark navbar-dark">
@@ -53,7 +54,10 @@ export default function Header() {
 
               {isAuthenticated && (
                 <li className="nav-item">
-                  <button className="nav-link bg-transparent border-0">
+                  <button
+                    className="nav-link bg-transparent border-0"
+                    onClick={() => signOut()}
+                  >
                     Log Out
                   </button>
                 </li>
