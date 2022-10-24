@@ -5,6 +5,7 @@ import { CreateUserDto } from '../users/dto/create-user.dto';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { AccessTokenGuard } from './guards/access-token.guard';
 import { RefreshTokenGuard } from './guards/refresh-token.guard';
+import { IAuthRequest } from './interfaces/auth-request.interface';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -26,16 +27,14 @@ export class AuthController {
   @ApiOperation({ summary: 'Logout' })
   @UseGuards(AccessTokenGuard)
   @Get('logout')
-  logout(@Req() req: Request) {
+  logout(@Req() req: IAuthRequest) {
     this.authService.logout(req.user['sub']);
   }
 
   @ApiOperation({ summary: 'Refresh Token' })
   @UseGuards(RefreshTokenGuard)
   @Get('refresh')
-  refreshTokens(@Req() req: Request) {
-    console.log(req.user);
-
+  refreshTokens(@Req() req: IAuthRequest) {
     const userId = req.user['sub'];
     const refreshToken = req.user['refreshToken'];
     return this.authService.refreshTokens(userId, refreshToken);

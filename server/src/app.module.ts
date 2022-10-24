@@ -7,6 +7,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { TodosModule } from './modules/todos/todos.module';
 import { UsersModule } from './modules/users/users.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { JWTModule } from './jwt/JWT.module';
 
 const envFilePath: string = getEnvPath(`${__dirname}/environments`);
 @Module({
@@ -22,6 +23,7 @@ const envFilePath: string = getEnvPath(`${__dirname}/environments`);
       }),
       inject: [ConfigService],
     }),
+    JWTModule,
     TodosModule,
     UsersModule,
     AuthModule,

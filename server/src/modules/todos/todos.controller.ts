@@ -16,6 +16,9 @@ import { CreateTodoDto } from './dto/create-todo.dto';
 import { Todo } from './schemas/todo.schema';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AccessTokenGuard } from '../auth/guards/access-token.guard';
+import { RoleType } from 'src/enums/role-type.enum';
+import { Roles } from 'src/decorators/roles.decorator';
+import { RolesGuard } from '../auth/guards/roles.guard';
 
 @ApiTags('todos')
 @Controller('todos')
@@ -39,7 +42,8 @@ export class TodosController {
     return this.services.getById(id);
   }
 
-  @UseGuards(AccessTokenGuard)
+  @Roles(RoleType.Admin)
+  @UseGuards(AccessTokenGuard, RolesGuard)
   @ApiOperation({ summary: 'Create a todo' })
   @Post()
   async create(

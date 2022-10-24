@@ -9,6 +9,7 @@ import { JwtService } from '@nestjs/jwt';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { hash, compare } from 'bcrypt';
 import { AuthDto } from './dto/auth.dto';
+import { IJwtPayload } from './interfaces/jwt-payload.interface';
 
 @Injectable()
 export class AuthService {
@@ -61,7 +62,6 @@ export class AuthService {
 
   async refreshTokens(userId: string, refreshToken: string) {
     const user = await this.usersService.findById(userId);
-    console.log(user);
 
     if (!user || !user.refreshToken)
       throw new ForbiddenException('Access Denied');
@@ -84,21 +84,23 @@ export class AuthService {
   }
 
   async getTokens(user) {
+    const payload: IJwtPayload = {
+      sub: user._id,
+      upn: user.username,
+      username: user.username,
+      email: user.email,
+      roles: user.roles,
+    };
+
     const [accessToken, refreshToken] = await Promise.all([
-      this.jwtService.signAsync(
-        { sub: user._id, username: user.username },
-        {
-          secret: this.configService.get<string>('JWT_ACCESS_SECRET'),
-          expiresIn: this.configService.get<string>('ACCESS_EXPIRES_IN'),
-        },
-      ),
-      this.jwtService.signAsync(
-        { sub: user._id, username: user.username },
-        {
-          secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
-          expiresIn: this.configService.get<string>('REFRESH_EXPIRES_IN'),
-        },
-      ),
+      this.jwtService.signAsync(payload, {
+        secret: this.configService.get<string>('JWT_ACCESS_SECRET'),
+        expiresIn: this.configService.get<string>('ACCESS_EXPIRES_IN'),
+      }),
+      this.jwtService.signAsync(payload, {
+        secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
+        expiresIn: this.configService.get<string>('REFRESH_EXPIRES_IN'),
+      }),
     ]);
 
     return {
@@ -108,6 +110,7 @@ export class AuthService {
         username: user.username,
         firstName: user.firstName,
         lastName: user.lastName,
+        roles: user.roles,
       },
       accessToken,
       refreshToken,

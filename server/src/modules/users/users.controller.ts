@@ -33,11 +33,8 @@ export class UsersController {
 
   @ApiOperation({ summary: 'Get user by id' })
   @Get(':id')
-  async findOne(
-    @Param('id') id: string,
-    @Query('withTodos', new DefaultValuePipe(false)) withTodos?: boolean,
-  ) {
-    return await this.usersService.findById(id, withTodos);
+  async findOne(@Param('id') id: string) {
+    return await this.usersService.findById(id);
   }
 
   @ApiOperation({ summary: 'Update an user' })
