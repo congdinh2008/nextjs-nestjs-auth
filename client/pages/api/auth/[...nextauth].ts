@@ -60,7 +60,7 @@ const providers = [
 
         return null;
       } catch (error: any) {
-        throw new Error(error);
+        throw error.response.data;
       }
     },
   }),

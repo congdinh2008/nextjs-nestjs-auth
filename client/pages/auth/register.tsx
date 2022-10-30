@@ -1,12 +1,44 @@
+import axios from "axios";
 import Image from "next/future/image";
 import Link from "next/link";
+import { useRouter } from "next/router";
+import { useState } from "react";
+import ModalDialog from "../../components/modal-dialog";
 
 export default function Register({ csrfToken }: { csrfToken: any }) {
-  const onSubmit = (e: any) => {
-    e.preventDefault();
+  const [isShowMessage, setIsShowMessage] = useState<boolean>(false);
+  const [dialogMessage, setDialogMessage] = useState<string>();
+  const router = useRouter();
+
+  const onSubmit = (event: any) => {
+    event.preventDefault();
+
+    const data = {
+      firstName: event.target.firstName.value,
+      lastName: event.target.lastName.value,
+      email: event.target.email.value,
+      username: event.target.userName.value,
+      password: event.target.password.value,
+    };
+
+    axios
+      .post("http://localhost:1990/auth/register", data)
+      .then((res) => router.push("/auth/login"))
+      .catch((err) => {
+        console.log(err);
+
+        setIsShowMessage(true);
+        setDialogMessage(err.response.data.message);
+      });
   };
   return (
     <div className="bg-purple">
+      <ModalDialog
+        title={"Register Failed"}
+        onClose={() => setIsShowMessage(false)}
+        isShow={isShowMessage}
+        data={{ message: dialogMessage }}
+      />
       <div className="stars">
         <div className="central-body">
           <form method="post" className="login" onSubmit={onSubmit}>

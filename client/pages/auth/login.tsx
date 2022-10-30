@@ -1,22 +1,49 @@
 import Image from "next/future/image";
 import Link from "next/link";
 import { getCsrfToken, signIn, useSession } from "next-auth/react";
+import { resolve } from "path";
+import { useRouter } from "next/router";
+import { error } from "console";
+import { useState } from "react";
+import MessageDialog from "../../components/modal-dialog";
+import ModalDialog from "../../components/modal-dialog";
 
 export default function Login({ csrfToken }: { csrfToken: any }) {
-  const onSubmitHandler = (event: any) => {
+  const [isShowMessage, setIsShowMessage] = useState<boolean>(false);
+  const [dialogMessage, setDialogMessage] = useState<string>();
+
+  const router = useRouter();
+
+  const onSubmitHandler = async (event: any) => {
     event.preventDefault();
     const data = {
       username: event.target.userName.value,
       password: event.target.password.value,
     };
-    const result = signIn("credentials", {
+
+    const res = await signIn("credentials", {
       username: data.username,
       password: data.password,
-      callbackUrl: "/",
+      redirect: false,
     });
+
+    if (res && res.status === 200 && res.ok) {
+      router.push("/");
+    }
+
+    if (res?.status === 400 || res?.status === 401) {
+      setIsShowMessage(true);
+      setDialogMessage(res.error);
+    }
   };
   return (
     <div className="bg-purple">
+      <ModalDialog
+        title={"Login Failed"}
+        onClose={() => setIsShowMessage(false)}
+        isShow={isShowMessage}
+        data={{ message: dialogMessage }}
+      />
       <div className="stars">
         <div className="central-body">
           <form method="post" className="login" onSubmit={onSubmitHandler}>
