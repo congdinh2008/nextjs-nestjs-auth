@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { getEnvPath } from './helpers/env.helper';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AppController } from './app.controller';
@@ -8,6 +8,7 @@ import { TodosModule } from './modules/todos/todos.module';
 import { UsersModule } from './modules/users/users.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { JWTModule } from './jwt/JWT.module';
+import { LoggerMiddleware } from './middlewares/logger.middleware';
 
 const envFilePath: string = getEnvPath(`${__dirname}/environments`);
 @Module({
@@ -31,4 +32,10 @@ const envFilePath: string = getEnvPath(`${__dirname}/environments`);
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(LoggerMiddleware).forRoutes('todos');
+    consumer.apply(LoggerMiddleware).forRoutes('auth');
+    consumer.apply(LoggerMiddleware).forRoutes('users');
+  }
+}

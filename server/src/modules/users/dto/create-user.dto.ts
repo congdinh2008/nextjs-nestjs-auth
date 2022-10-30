@@ -27,7 +27,7 @@ export class CreateUserDto {
   @ApiProperty({ title: 'Password', description: 'Password', required: true })
   password: string;
 
-  refreshToken: string;
+  refreshToken?: string;
 
   @IsEnum(RoleType)
   @ApiProperty({ title: 'Role', description: 'Role' })
